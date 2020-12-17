@@ -9,8 +9,10 @@ module RedmineMsteams
       return unless url
       return if issue.is_private?
 
-      title = "#{escape issue.project}"
-            text = "#{escape issue.author} created [#{escape issue}](#{object_url issue}) #{mentions issue.description}"
+      # title = "#{escape issue.project}" # makes only sense if 1 teams channel for all redmine projects
+      title = "Neues Ticket"
+      text = "#{escape issue.author} hat [#{escape issue}](#{object_url issue}) erstellt #{mentions issue.description}"
+
 
       msg=TeamsMessage.new(text,title)
       facts = {
@@ -36,12 +38,13 @@ module RedmineMsteams
 
       return unless url = url_for_project(issue.project)
 
-      title = "#{escape issue.project}"
-      text = "#{escape journal.user.to_s} updated [#{escape issue}](#{object_url issue}) #{mentions journal.notes}"
-
+      #title = "#{escape issue.project}"
+      title = "Ticket-Update"
+      text = "#{escape journal.user.to_s} hat [#{escape issue}](#{object_url issue}) aktualisiert #{ActionView::Base.full_sanitizer.sanitize(mentions journal.notes)}"
+      
       factsTitle = escape journal.notes if journal.notes
       facts = get_facts(journal)
-
+      
       msg=TeamsMessage.new(text,title)
       msg.addFacts(factsTitle,facts)
       msg.send(url,true)
@@ -58,7 +61,8 @@ module RedmineMsteams
       return if issue.is_private?
 
       title = "#{escape issue.project}"
-            text = "#{escape journal.user.to_s} updated [#{escape issue}](#{object_url issue})"
+      text = "#{escape journal.user.to_s} updated [#{escape issue}](#{object_url issue})"
+
 
       repository = changeset.repository
 
@@ -110,6 +114,7 @@ module RedmineMsteams
 
       if not page.content.comments.empty?
         comment="#{comment}\n\n#{escape page.content.comments}"
+
       end
 
       msg=TeamsMessage.new(comment,title)
